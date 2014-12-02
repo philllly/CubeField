@@ -25,45 +25,37 @@ import java.util.ArrayList;
 public class Main extends SimpleApplication {
 
     private ArrayList<Cube> cubeField;
+    Geometry player;
+    private boolean START;
     
     public static void main(String[] args) {
         Main app = new Main();
         AppSettings settings = new AppSettings(true);
+        settings.setFrameRate(60);
         settings.setTitle("CubeField");
+        app.setSettings(settings);
         app.start();
     }
 
     @Override
     public void simpleInitApp() {
-//        Box b = new Box(Vector3f.ZERO, 1, 1, 1);
-//        Geometry geom = new Geometry("Box", b);
-//        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-//        mat.setColor("Color", ColorRGBA.Blue);
-//        geom.setMaterial(mat);
-//
-//        
-//        Vector3f v = new Vector3f(2.0f, 1.0f, -3.0f);
-//        Box b2 = new Box(Vector3f.ZERO, 1, 1, 1);
-//        Geometry geom2 = new Geometry("Box", b2);
-//        Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-//        mat2.setColor("Color", ColorRGBA.Yellow);
-//        geom2.setMaterial(mat2);
-//        geom2.setLocalTranslation(v);
-//        geom2.scale(0.5f);
+        flyCam.setEnabled(false);
         Geometry floorMesh = createFloor();
         rootNode.attachChild(floorMesh);
-        Geometry playerMesh = createPlayer();
-        rootNode.attachChild(playerMesh);
+        player = createPlayer();
+        rootNode.attachChild(player);
         Vector3f v = new Vector3f(2.0f, 1.0f, -3.0f);
         Geometry cubeMesh = createCube(v, ColorRGBA.Blue);
         rootNode.attachChild(cubeMesh);
+        
         
         cubeField = new ArrayList<Cube>();
     }
 
     @Override
     public void simpleUpdate(float tpf) {
-        //TODO: add update code
+        gameLogic(1);
+        camBehind();
     }
     
     public Geometry createFloor() {
@@ -101,6 +93,20 @@ public class Main extends SimpleApplication {
     }
     
     public void gameLost() {
+        
+    }
+    
+    public void camBehind() {
+        cam.setLocation(player.getLocalTranslation().add(0, 2, -8));
+        cam.lookAt(player.getLocalTranslation(), Vector3f.UNIT_Z);
+        
+    }
+    
+    public void gameLogic(float tpf) {
+        player.move(0, 0, 1);
+    }
+    
+    public void createRandomCubes(ColorRGBA col) {
         
     }
 }
