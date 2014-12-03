@@ -1,6 +1,7 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.bounding.BoundingVolume;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -24,9 +25,10 @@ import java.util.ArrayList;
  */
 public class Main extends SimpleApplication {
 
-    private ArrayList<Cube> cubeField;
-    Geometry player;
-    private boolean START;
+    private ArrayList<Geometry> cubeField;
+    private Node playerAndFloor;
+    private boolean RUNNING;
+    private ColorRGBA cubeColor;
     
     public static void main(String[] args) {
         Main app = new Main();
@@ -40,26 +42,32 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleInitApp() {
         flyCam.setEnabled(false);
-        Geometry floorMesh = createFloor();
-        rootNode.attachChild(floorMesh);
-        player = createPlayer();
-        rootNode.attachChild(player);
-        Vector3f v = new Vector3f(2.0f, 1.0f, -3.0f);
-        Geometry cubeMesh = createCube(v, ColorRGBA.Blue);
-        rootNode.attachChild(cubeMesh);
         
+        playerAndFloor = createPlayerAndFloor();
+        rootNode.attachChild(playerAndFloor);
+        cubeColor = ColorRGBA.Red;
         
-        cubeField = new ArrayList<Cube>();
+        cam.setLocation(playerAndFloor.getLocalTranslation().add(0, 2, -8));
+        cam.lookAt(playerAndFloor.getLocalTranslation(), Vector3f.UNIT_Z);
+               
+        RUNNING = true;
+        
+        cubeField = new ArrayList<Geometry>();
+
+
     }
 
     @Override
     public void simpleUpdate(float tpf) {
-        gameLogic(1);
+        if (RUNNING) {
+            gameLogic(tpf);
+        }
         camBehind();
+     
     }
     
     public Geometry createFloor() {
-        Vector3f v = new Vector3f(0.0f, -1.0f, 1.0f);
+        Vector3f v = new Vector3f(0.0f, 0.0f, 50.0f);
         Box floor = new Box(v, 100, 0, 100);
         Geometry floorMesh = new Geometry("Floor", floor);
         Material floorMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -79,13 +87,41 @@ public class Main extends SimpleApplication {
         return playerMesh;
     }
     
-    public Geometry createCube(Vector3f loc, ColorRGBA col) {
+    public Node createPlayerAndFloor() {
+        Geometry player = createPlayer();
+        Geometry floor = createFloor();
+        Node node = new Node();
+        node.attachChild(player);
+        node.attachChild(floor);
+        return node;
+    }
+    
+    public Geometry createCube(Vector3f loc) {
         Box b = new Box(loc, 1, 1, 1);
         Geometry cubeMesh = new Geometry("Cube", b);
         Material cubeMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        cubeMaterial.setColor("Color", col);
+        cubeMaterial.setColor("Color", ColorRGBA.Red);
         cubeMesh.setMaterial(cubeMaterial);
+        cubeMesh.setName("cube");
         return cubeMesh;
+    }
+    
+    public void addRandomCube() {
+        
+        int playerX = (int) playerAndFloor.getLocalTranslation().getX();
+        int playerZ = (int) playerAndFloor.getLocalTranslation().getZ();
+        
+        float x = FastMath.nextRandomInt(playerX - 20, playerX + 20);
+        float z = playerZ + 20;
+        Vector3f v = new Vector3f(x, 0.0f, z);
+        Geometry cube = createCube(v);
+        try {
+            rootNode.attachChild(cube);
+        } catch (NullPointerException e) {
+            System.out.println("Null Pointer Exception");
+        }
+        cubeField.add(cube);
+        
     }
 
     public void gameReset() {
@@ -93,20 +129,41 @@ public class Main extends SimpleApplication {
     }
     
     public void gameLost() {
+        RUNNING = false;
+        gameReset();
         
     }
     
     public void camBehind() {
-        cam.setLocation(player.getLocalTranslation().add(0, 2, -8));
-        cam.lookAt(player.getLocalTranslation(), Vector3f.UNIT_Z);
+        cam.setLocation(playerAndFloor.getLocalTranslation().add(0, 2, -8));
+        cam.lookAt(playerAndFloor.getLocalTranslation(), Vector3f.UNIT_Z);
         
     }
     
     public void gameLogic(float tpf) {
-        player.move(0, 0, 1);
+        Vector3f v = new Vector3f(0.0f, 0.0f, 0.1f);
+        playerAndFloor.move(v);
+        
+        
+        addRandomCube();
+        
+//        for (Geometry c : cubeField) {
+//            Geometry playerModel = (Geometry) playerAndFloor.getChild(0);
+//            BoundingVolume playerVolume = playerModel.getWorldBound();
+//            BoundingVolume cubeVolume = c.getWorldBound();
+//            if (playerVolume.intersects(cubeVolume)) {
+//                gameLost();
+//                return;
+//            }
+//           
+//            float cubeZ = c.getLocalTranslation().getZ();
+//            float playerZ = playerAndFloor.getLocalTranslation().getZ();
+//            if (cubeZ + 2 < playerZ) {
+//                c.removeFromParent();
+//                cubeField.remove(c);
+//            }
+//        }
     }
     
-    public void createRandomCubes(ColorRGBA col) {
-        
-    }
+    
 }
