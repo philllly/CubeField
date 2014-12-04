@@ -2,6 +2,7 @@ package mygame;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.bounding.BoundingVolume;
+import com.jme3.font.BitmapFont;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -22,6 +23,7 @@ import com.jme3.input.KeyInput;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.font.BitmapText;
+import com.jme3.math.Rectangle;
 import com.leapmotion.leap.*;
 import com.leapmotion.leap.Gesture.State;
 
@@ -129,24 +131,22 @@ public class Main extends SimpleApplication implements AnalogListener {
     }
     
     public void createStartText() {
-        guiFont = assetManager.loadFont("Interface/Fonts/Default.fnt");
         startText = new BitmapText(guiFont, false);
         startText.setText("Start");
-        startText.setSize(100);
+        startText.setSize(50);
         startText.setColor(ColorRGBA.Blue);
-        startText.setLocalTranslation(0f, 0f, 0f);
+        startText.setLocalTranslation(100, startText.getLineHeight(), 0f);
         guiNode.attachChild(startText);
         
         
     }
     
     public void createScoreText() {
-        guiFont = assetManager.loadFont("Interface/Fonts/Default.fnt");
         scoreText = new BitmapText(guiFont, false);
         scoreText.setText("Score: ");
-        scoreText.setSize(100);
-        scoreText.setColor(ColorRGBA.Blue);
-        scoreText.setLocalTranslation(0f, 0f, 0f);
+        scoreText.setSize(50);
+        scoreText.setColor(ColorRGBA.Orange);
+        scoreText.setLocalTranslation(300, scoreText.getLineHeight(), 0f);
         guiNode.attachChild(scoreText);
     }
     
@@ -193,9 +193,10 @@ public class Main extends SimpleApplication implements AnalogListener {
     public void gameLogic(float tpf) {
         Vector3f v = new Vector3f(0.0f, 0.0f, 0.5f);
         playerAndFloor.move(v);
+        score += 1;
         
         rollAngle = LeapMotionListener.getRoll();
-        System.out.println("rollAngle: " + rollAngle + " degrees");
+        //System.out.println("rollAngle: " + rollAngle + " degrees");
         float turnSpeed = .50f * (float)rollAngle / 90.0f;
         if (rollAngle > 0.0 && rollAngle < 90.0) {
             playerAndFloor.move(turnSpeed, 0, 0);
