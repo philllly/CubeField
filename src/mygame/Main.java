@@ -18,34 +18,60 @@ import com.jme3.input.*;
 import com.jme3.input.controls.*;
 import com.jme3.scene.shape.Dome;
 import java.util.ArrayList;
+import com.jme3.input.KeyInput;
+import com.jme3.input.controls.AnalogListener;
+import com.jme3.input.controls.KeyTrigger;
+import com.jme3.font.BitmapText;
+import com.leapmotion.leap.*;
+import com.leapmotion.leap.Gesture.State;
 
 /**
  * test
  * @author normenhansen
  */
-public class Main extends SimpleApplication {
+public class Main extends SimpleApplication implements AnalogListener {
 
     private ArrayList<Geometry> cubeField;
     private Node playerAndFloor;
     private boolean RUNNING;
     private ColorRGBA cubeColor;
+    private float timeInterval = 0;
+    private BitmapText startText;
+    private BitmapText scoreText;
+    private int score = 0;
+    private double rollAngle;
+    private LeapMotionListener listener;
+    private Controller controller;
     
     public static void main(String[] args) {
         Main app = new Main();
+        GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().
+                getDefaultScreenDevice();
+        DisplayMode[] modes = device.getDisplayModes();
         AppSettings settings = new AppSettings(true);
         settings.setFrameRate(60);
         settings.setTitle("CubeField");
+        settings.setResolution(modes[0].getWidth(),modes[0].getHeight());
+        settings.setFullscreen(true);
         app.setSettings(settings);
         app.start();
+        
+        
     }
 
     @Override
     public void simpleInitApp() {
         flyCam.setEnabled(false);
-        
+        setupLeapMotion();
+        Keys();
+        setDisplayStatView(false); 
+        setDisplayFps(false);
         playerAndFloor = createPlayerAndFloor();
         rootNode.attachChild(playerAndFloor);
         cubeColor = ColorRGBA.Red;
+      
+        createStartText();
+        createScoreText();
         
         cam.setLocation(playerAndFloor.getLocalTranslation().add(0, 2, -8));
         cam.lookAt(playerAndFloor.getLocalTranslation(), Vector3f.UNIT_Z);
@@ -55,6 +81,12 @@ public class Main extends SimpleApplication {
         cubeField = new ArrayList<Geometry>();
 
 
+    }
+    
+    public void setupLeapMotion() {
+        listener = new LeapMotionListener();
+        controller = new Controller();
+        controller.addListener(listener);
     }
 
     @Override
@@ -78,7 +110,7 @@ public class Main extends SimpleApplication {
     }
     
     public Geometry createPlayer() {
-        Dome b = new Dome(Vector3f.ZERO, 10, 100, 1);
+        Dome b = new Dome(Vector3f.ZERO, 10, 100, 0.5f);
         Geometry playerMesh = new Geometry("Player", b);
         Material playerMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         playerMaterial.setColor("Color", ColorRGBA.Red);
@@ -96,6 +128,28 @@ public class Main extends SimpleApplication {
         return node;
     }
     
+    public void createStartText() {
+        guiFont = assetManager.loadFont("Interface/Fonts/Default.fnt");
+        startText = new BitmapText(guiFont, false);
+        startText.setText("Start");
+        startText.setSize(100);
+        startText.setColor(ColorRGBA.Blue);
+        startText.setLocalTranslation(0f, 0f, 0f);
+        guiNode.attachChild(startText);
+        
+        
+    }
+    
+    public void createScoreText() {
+        guiFont = assetManager.loadFont("Interface/Fonts/Default.fnt");
+        scoreText = new BitmapText(guiFont, false);
+        scoreText.setText("Score: ");
+        scoreText.setSize(100);
+        scoreText.setColor(ColorRGBA.Blue);
+        scoreText.setLocalTranslation(0f, 0f, 0f);
+        guiNode.attachChild(scoreText);
+    }
+    
     public Geometry createCube(Vector3f loc) {
         Box b = new Box(loc, 1, 1, 1);
         Geometry cubeMesh = new Geometry("Cube", b);
@@ -111,15 +165,11 @@ public class Main extends SimpleApplication {
         int playerX = (int) playerAndFloor.getLocalTranslation().getX();
         int playerZ = (int) playerAndFloor.getLocalTranslation().getZ();
         
-        float x = FastMath.nextRandomInt(playerX - 20, playerX + 20);
-        float z = playerZ + 20;
-        Vector3f v = new Vector3f(x, 0.0f, z);
+        float x = FastMath.nextRandomInt(playerX - 40, playerX + 40);
+        float z = playerZ + 50;
+        Vector3f v = new Vector3f(x, 0.5f, z);
         Geometry cube = createCube(v);
-        try {
-            rootNode.attachChild(cube);
-        } catch (NullPointerException e) {
-            System.out.println("Null Pointer Exception");
-        }
+        rootNode.attachChild(cube);
         cubeField.add(cube);
         
     }
@@ -135,35 +185,72 @@ public class Main extends SimpleApplication {
     }
     
     public void camBehind() {
-        cam.setLocation(playerAndFloor.getLocalTranslation().add(0, 2, -8));
+        cam.setLocation(playerAndFloor.getLocalTranslation().add(0, 1, -3));
         cam.lookAt(playerAndFloor.getLocalTranslation(), Vector3f.UNIT_Z);
         
     }
     
     public void gameLogic(float tpf) {
-        Vector3f v = new Vector3f(0.0f, 0.0f, 0.1f);
+        Vector3f v = new Vector3f(0.0f, 0.0f, 0.5f);
         playerAndFloor.move(v);
         
+        rollAngle = LeapMotionListener.getRoll();
+        System.out.println("rollAngle: " + rollAngle + " degrees");
+        float turnSpeed = .50f * (float)rollAngle / 90.0f;
+        if (rollAngle > 0.0 && rollAngle < 90.0) {
+            playerAndFloor.move(turnSpeed, 0, 0);
+        } else if (rollAngle < 0.0) {
+            playerAndFloor.move(turnSpeed, 0, 0);
+        } 
         
-        addRandomCube();
+        timeInterval += tpf;
+        if (timeInterval > 0.2) {
+            addRandomCube();
+            timeInterval = 0;
+        }
         
-//        for (Geometry c : cubeField) {
-//            Geometry playerModel = (Geometry) playerAndFloor.getChild(0);
-//            BoundingVolume playerVolume = playerModel.getWorldBound();
-//            BoundingVolume cubeVolume = c.getWorldBound();
-//            if (playerVolume.intersects(cubeVolume)) {
-//                gameLost();
-//                return;
-//            }
-//           
-//            float cubeZ = c.getLocalTranslation().getZ();
-//            float playerZ = playerAndFloor.getLocalTranslation().getZ();
-//            if (cubeZ + 2 < playerZ) {
-//                c.removeFromParent();
-//                cubeField.remove(c);
-//            }
-//        }
+        for (int i = 0; i < cubeField.size(); i++) {
+            Geometry playerModel = (Geometry) playerAndFloor.getChild(0);
+            BoundingVolume playerVolume = playerModel.getWorldBound();
+            BoundingVolume cubeVolume = cubeField.get(i).getWorldBound();
+
+            float cubeZ = cubeField.get(i).getLocalTranslation().getZ();
+            float playerZ = playerAndFloor.getLocalTranslation().getZ();
+
+            if (playerVolume.intersects(cubeVolume)) {
+                gameLost();
+                return;
+            }
+            if (cubeZ > playerZ) {
+                cubeField.get(i).removeFromParent();
+                cubeField.remove(cubeField.get(i));
+            }
+        }
+        scoreText.setText("Score: " + score);
     }
     
+    public void Keys() {
+        inputManager.addMapping("START", new KeyTrigger(KeyInput.KEY_RETURN));
+        inputManager.addMapping("Left",  new KeyTrigger(KeyInput.KEY_LEFT));
+        inputManager.addMapping("Right", new KeyTrigger(KeyInput.KEY_RIGHT));
+        inputManager.addListener(this, "START", "Left", "Right");
+    }
+    
+    public void onAnalog(String binding, float value, float tpf) {
+        if (binding.equals("START") && !RUNNING){
+            RUNNING = true;
+            System.out.println("START");
+        }else if (RUNNING == true && binding.equals("Left")){
+            playerAndFloor.move(.2f, 0, 0);
+            //camAngle -= value*tpf;
+        }else if (RUNNING == true && binding.equals("Right")){
+            playerAndFloor.move(-.2f, 0, 0);
+            //camAngle += value*tpf;
+        }
+    }
+    
+    public void setRollAngle(double angle) {
+        rollAngle = angle;
+    }
     
 }
