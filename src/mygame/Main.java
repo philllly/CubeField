@@ -1,6 +1,7 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.audio.AudioNode;
 import com.jme3.bounding.BoundingVolume;
 import com.jme3.font.BitmapFont;
 import com.jme3.material.Material;
@@ -44,6 +45,8 @@ public class Main extends SimpleApplication implements AnalogListener {
     private double rollAngle;
     private LeapMotionListener listener;
     private Controller controller;
+    private float turnSpeed;
+    private AudioNode music;
     
     public static void main(String[] args) {
         Main app = new Main();
@@ -75,12 +78,16 @@ public class Main extends SimpleApplication implements AnalogListener {
         createStartText();
         createScoreText();
         
+        music = new AudioNode(assetManager, "Sounds/Tron Legacy.wav", true);
+        music.setPositional(false);
+        rootNode.attachChild(music);
         cam.setLocation(playerAndFloor.getLocalTranslation().add(0, 2, -8));
         cam.lookAt(playerAndFloor.getLocalTranslation(), Vector3f.UNIT_Z);
                
-        RUNNING = true;
+        RUNNING = false;
         
         cubeField = new ArrayList<Geometry>();
+        gameReset();
 
 
     }
@@ -132,7 +139,7 @@ public class Main extends SimpleApplication implements AnalogListener {
     
     public void createStartText() {
         startText = new BitmapText(guiFont, false);
-        startText.setText("Start");
+        startText.setText("Press Enter to Start");
         startText.setSize(50);
         startText.setColor(ColorRGBA.Blue);
         startText.setLocalTranslation(100, startText.getLineHeight(), 0f);
@@ -175,12 +182,17 @@ public class Main extends SimpleApplication implements AnalogListener {
     }
 
     public void gameReset() {
-  
+        score = 0;
+        for (Geometry cube : cubeField) {
+            cube.removeFromParent();
+        }
+        cubeField.clear();
+        playerAndFloor.setLocalTranslation(0, 0, 0);
     }
     
     public void gameLost() {
         RUNNING = false;
-        gameReset();
+        createStartText();
         
     }
     
@@ -197,12 +209,11 @@ public class Main extends SimpleApplication implements AnalogListener {
         
         rollAngle = LeapMotionListener.getRoll();
         //System.out.println("rollAngle: " + rollAngle + " degrees");
-        float turnSpeed = .50f * (float)rollAngle / 90.0f;
-        if (rollAngle > 0.0 && rollAngle < 90.0) {
-            playerAndFloor.move(turnSpeed, 0, 0);
-        } else if (rollAngle < 0.0) {
-            playerAndFloor.move(turnSpeed, 0, 0);
+        turnSpeed = 0.0f;
+        if ((rollAngle > 0.0 && rollAngle < 90.0) || (rollAngle > -90.0) && rollAngle < 0.0) {
+            turnSpeed = .50f * (float)rollAngle / 90.0f;
         } 
+        playerAndFloor.move(turnSpeed, 0, 0);
         
         timeInterval += tpf;
         if (timeInterval > 0.2) {
@@ -240,6 +251,9 @@ public class Main extends SimpleApplication implements AnalogListener {
     public void onAnalog(String binding, float value, float tpf) {
         if (binding.equals("START") && !RUNNING){
             RUNNING = true;
+            guiNode.detachChild(startText);
+            music.play();
+            gameReset();
             System.out.println("START");
         }else if (RUNNING == true && binding.equals("Left")){
             playerAndFloor.move(.2f, 0, 0);
