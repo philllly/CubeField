@@ -39,6 +39,7 @@ public class Main extends SimpleApplication implements AnalogListener {
     private boolean RUNNING;
     private ColorRGBA cubeColor;
     private float timeInterval = 0;
+    private float secondsElapsed = 0;
     private BitmapText startText;
     private BitmapText scoreText;
     private int score = 0;
@@ -47,6 +48,7 @@ public class Main extends SimpleApplication implements AnalogListener {
     private Controller controller;
     private float turnSpeed;
     private AudioNode music;
+    private double spawnInterval;
     
     public static void main(String[] args) {
         Main app = new Main();
@@ -222,13 +224,12 @@ public class Main extends SimpleApplication implements AnalogListener {
         } else if (rollAngle < 0.0) {
             playerAndFloor.move(turnSpeed, 0, 0);
         } 
-        
-//        if ((rollAngle > 0.0 && rollAngle < 90.0) || (rollAngle > -90.0) && rollAngle < 0.0) {
-//            turnSpeed = .50f * (float)rollAngle / 90.0f;
-//        } 
-        
+        secondsElapsed += tpf;
+        spawnInterval = -1.312 * Math.pow(10, -7) * Math.pow(secondsElapsed, 3) + 
+                3.958 * Math.pow(10, -5) * Math.pow(secondsElapsed, 2) - 
+                .0044 * secondsElapsed + .2;
         timeInterval += tpf;
-        if (timeInterval > 0.2) {
+        if (timeInterval > spawnInterval) {
             addRandomCube();
             timeInterval = 0;
         }
