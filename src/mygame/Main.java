@@ -24,9 +24,7 @@ import com.jme3.input.KeyInput;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.font.BitmapText;
-import com.jme3.light.DirectionalLight;
 import com.jme3.math.Rectangle;
-import com.jme3.scene.Spatial;
 import com.leapmotion.leap.*;
 import com.leapmotion.leap.Gesture.State;
 
@@ -49,7 +47,6 @@ public class Main extends SimpleApplication implements AnalogListener {
     private Controller controller;
     private float turnSpeed;
     private AudioNode music;
-    private Spatial futuristicPlane;
     
     public static void main(String[] args) {
         Main app = new Main();
@@ -76,14 +73,13 @@ public class Main extends SimpleApplication implements AnalogListener {
         setDisplayFps(false);
         playerAndFloor = createPlayerAndFloor();
         rootNode.attachChild(playerAndFloor);
-        renderer.setBackgroundColor(ColorRGBA.Black);
         cubeColor = ColorRGBA.Red;
+      
         createStartText();
-        //createSun();
+        createScoreText();
         
         music = new AudioNode(assetManager, "Sounds/Tron Legacy.wav", true);
         music.setPositional(false);
-        music.play();
         rootNode.attachChild(music);
         cam.setLocation(playerAndFloor.getLocalTranslation().add(0, 2, -8));
         cam.lookAt(playerAndFloor.getLocalTranslation(), Vector3f.UNIT_Z);
@@ -116,7 +112,7 @@ public class Main extends SimpleApplication implements AnalogListener {
         Box floor = new Box(v, 100, 0, 100);
         Geometry floorMesh = new Geometry("Floor", floor);
         Material floorMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        floorMaterial.setColor("Color", ColorRGBA.Black);
+        floorMaterial.setColor("Color", ColorRGBA.LightGray);
         floorMesh.setMaterial(floorMaterial);
         floorMesh.setName("floor");
         return floorMesh;
@@ -130,26 +126,10 @@ public class Main extends SimpleApplication implements AnalogListener {
         playerMesh.setMaterial(playerMaterial);
         playerMesh.setName("player");
         return playerMesh;
-        
-//        futuristicPlane = assetManager.loadModel("Models/Futuristic plane/Futuristic plane.j3o");
-//        futuristicPlane.scale(0.1f, 0.1f, 0.1f);    
-//        futuristicPlane.rotate(0.0f, (float)Math.PI, 0.0f);
-//        futuristicPlane.setLocalTranslation(0, 0, 0);
-//        futuristicPlane.setName("plane");
-//        futuristicPlane.setBoundRefresh();
-//          
-//        return futuristicPlane;
-          
-    }
-    
-    public void createSun() {
-        DirectionalLight sun = new DirectionalLight();
-        sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f).normalizeLocal());
-        rootNode.addLight(sun);
     }
     
     public Node createPlayerAndFloor() {
-        Spatial player = createPlayer();
+        Geometry player = createPlayer();
         Geometry floor = createFloor();
         Node node = new Node();
         node.attachChild(player);
@@ -182,7 +162,6 @@ public class Main extends SimpleApplication implements AnalogListener {
         Geometry cubeMesh = new Geometry("Cube", b);
         Material cubeMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         cubeMaterial.setColor("Color", ColorRGBA.Red);
-        cubeMaterial.getAdditionalRenderState().setWireframe(true);
         cubeMesh.setMaterial(cubeMaterial);
         cubeMesh.setName("cube");
         return cubeMesh;
@@ -195,7 +174,7 @@ public class Main extends SimpleApplication implements AnalogListener {
         
         float x = FastMath.nextRandomInt(playerX - 40, playerX + 40);
         float z = playerZ + 50;
-        Vector3f v = new Vector3f(x, 1f, z);
+        Vector3f v = new Vector3f(x, 0.5f, z);
         Geometry cube = createCube(v);
         rootNode.attachChild(cube);
         cubeField.add(cube);
@@ -219,8 +198,7 @@ public class Main extends SimpleApplication implements AnalogListener {
     
     public void camBehind() {
         cam.setLocation(playerAndFloor.getLocalTranslation().add(0, 1, -3));
-        Vector3f viewTarget = playerAndFloor.getLocalTranslation().add(0, 0, 5);
-        cam.lookAt(viewTarget, Vector3f.UNIT_Z);
+        cam.lookAt(playerAndFloor.getLocalTranslation(), Vector3f.UNIT_Z);
         
     }
     
@@ -231,18 +209,11 @@ public class Main extends SimpleApplication implements AnalogListener {
         
         rollAngle = LeapMotionListener.getRoll();
         //System.out.println("rollAngle: " + rollAngle + " degrees");
-        
-        
-        turnSpeed = .50f * (float)rollAngle / 90.0f;
-        if (rollAngle > 0.0 && rollAngle < 179.0) {
-            playerAndFloor.move(turnSpeed, 0, 0);
-        } else if (rollAngle < 0.0) {
-            playerAndFloor.move(turnSpeed, 0, 0);
+        turnSpeed = 0.0f;
+        if ((rollAngle > 0.0 && rollAngle < 90.0) || (rollAngle > -90.0) && rollAngle < 0.0) {
+            turnSpeed = .50f * (float)rollAngle / 90.0f;
         } 
-        
-//        if ((rollAngle > 0.0 && rollAngle < 90.0) || (rollAngle > -90.0) && rollAngle < 0.0) {
-//            turnSpeed = .50f * (float)rollAngle / 90.0f;
-//        } 
+        playerAndFloor.move(turnSpeed, 0, 0);
         
         timeInterval += tpf;
         if (timeInterval > 0.2) {
@@ -251,7 +222,7 @@ public class Main extends SimpleApplication implements AnalogListener {
         }
         
         for (int i = 0; i < cubeField.size(); i++) {
-            Spatial playerModel = playerAndFloor.getChild(0);
+            Geometry playerModel = (Geometry) playerAndFloor.getChild(0);
             BoundingVolume playerVolume = playerModel.getWorldBound();
             BoundingVolume cubeVolume = cubeField.get(i).getWorldBound();
 
@@ -281,6 +252,7 @@ public class Main extends SimpleApplication implements AnalogListener {
         if (binding.equals("START") && !RUNNING){
             RUNNING = true;
             guiNode.detachChild(startText);
+            music.play();
             gameReset();
             System.out.println("START");
         }else if (RUNNING == true && binding.equals("Left")){
