@@ -74,12 +74,12 @@ public class Main extends SimpleApplication implements AnalogListener {
         playerAndFloor = createPlayerAndFloor();
         rootNode.attachChild(playerAndFloor);
         cubeColor = ColorRGBA.Red;
-      
         createStartText();
         createScoreText();
         
         music = new AudioNode(assetManager, "Sounds/Tron Legacy.wav", true);
         music.setPositional(false);
+        music.play();
         rootNode.attachChild(music);
         cam.setLocation(playerAndFloor.getLocalTranslation().add(0, 2, -8));
         cam.lookAt(playerAndFloor.getLocalTranslation(), Vector3f.UNIT_Z);
@@ -198,7 +198,8 @@ public class Main extends SimpleApplication implements AnalogListener {
     
     public void camBehind() {
         cam.setLocation(playerAndFloor.getLocalTranslation().add(0, 1, -3));
-        cam.lookAt(playerAndFloor.getLocalTranslation(), Vector3f.UNIT_Z);
+        Vector3f viewTarget = playerAndFloor.getLocalTranslation().add(0, 0, 5);
+        cam.lookAt(viewTarget, Vector3f.UNIT_Z);
         
     }
     
@@ -209,11 +210,18 @@ public class Main extends SimpleApplication implements AnalogListener {
         
         rollAngle = LeapMotionListener.getRoll();
         //System.out.println("rollAngle: " + rollAngle + " degrees");
-        turnSpeed = 0.0f;
-        if ((rollAngle > 0.0 && rollAngle < 90.0) || (rollAngle > -90.0) && rollAngle < 0.0) {
-            turnSpeed = .50f * (float)rollAngle / 90.0f;
+        
+        
+        turnSpeed = .50f * (float)rollAngle / 90.0f;
+        if (rollAngle > 0.0 && rollAngle < 179.0) {
+            playerAndFloor.move(turnSpeed, 0, 0);
+        } else if (rollAngle < 0.0) {
+            playerAndFloor.move(turnSpeed, 0, 0);
         } 
-        playerAndFloor.move(turnSpeed, 0, 0);
+        
+//        if ((rollAngle > 0.0 && rollAngle < 90.0) || (rollAngle > -90.0) && rollAngle < 0.0) {
+//            turnSpeed = .50f * (float)rollAngle / 90.0f;
+//        } 
         
         timeInterval += tpf;
         if (timeInterval > 0.2) {
@@ -252,7 +260,6 @@ public class Main extends SimpleApplication implements AnalogListener {
         if (binding.equals("START") && !RUNNING){
             RUNNING = true;
             guiNode.detachChild(startText);
-            music.play();
             gameReset();
             System.out.println("START");
         }else if (RUNNING == true && binding.equals("Left")){
