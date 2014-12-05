@@ -77,6 +77,8 @@ public class Main extends SimpleApplication implements AnalogListener {
         createStartText();
         createScoreText();
         
+        renderer.setBackgroundColor(ColorRGBA.Black);
+        
         music = new AudioNode(assetManager, "Sounds/Tron Legacy.wav", true);
         music.setPositional(false);
         music.play();
@@ -112,7 +114,7 @@ public class Main extends SimpleApplication implements AnalogListener {
         Box floor = new Box(v, 100, 0, 100);
         Geometry floorMesh = new Geometry("Floor", floor);
         Material floorMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        floorMaterial.setColor("Color", ColorRGBA.LightGray);
+        floorMaterial.setColor("Color", ColorRGBA.Black);
         floorMesh.setMaterial(floorMaterial);
         floorMesh.setName("floor");
         return floorMesh;
@@ -162,8 +164,10 @@ public class Main extends SimpleApplication implements AnalogListener {
         Geometry cubeMesh = new Geometry("Cube", b);
         Material cubeMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         cubeMaterial.setColor("Color", ColorRGBA.Red);
+        cubeMaterial.getAdditionalRenderState().setWireframe(true);
         cubeMesh.setMaterial(cubeMaterial);
         cubeMesh.setName("cube");
+        
         return cubeMesh;
     }
     
@@ -174,7 +178,7 @@ public class Main extends SimpleApplication implements AnalogListener {
         
         float x = FastMath.nextRandomInt(playerX - 40, playerX + 40);
         float z = playerZ + 50;
-        Vector3f v = new Vector3f(x, 0.5f, z);
+        Vector3f v = new Vector3f(x, 1f, z);
         Geometry cube = createCube(v);
         rootNode.attachChild(cube);
         cubeField.add(cube);
