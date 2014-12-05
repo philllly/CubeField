@@ -24,7 +24,9 @@ import com.jme3.input.KeyInput;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.font.BitmapText;
+import com.jme3.light.DirectionalLight;
 import com.jme3.math.Rectangle;
+import com.jme3.scene.Spatial;
 import com.leapmotion.leap.*;
 import com.leapmotion.leap.Gesture.State;
 
@@ -47,6 +49,7 @@ public class Main extends SimpleApplication implements AnalogListener {
     private Controller controller;
     private float turnSpeed;
     private AudioNode music;
+    private Spatial futuristicPlane;
     
     public static void main(String[] args) {
         Main app = new Main();
@@ -73,9 +76,10 @@ public class Main extends SimpleApplication implements AnalogListener {
         setDisplayFps(false);
         playerAndFloor = createPlayerAndFloor();
         rootNode.attachChild(playerAndFloor);
+        renderer.setBackgroundColor(ColorRGBA.Black);
         cubeColor = ColorRGBA.Red;
         createStartText();
-        createScoreText();
+        //createSun();
         
         music = new AudioNode(assetManager, "Sounds/Tron Legacy.wav", true);
         music.setPositional(false);
@@ -112,7 +116,7 @@ public class Main extends SimpleApplication implements AnalogListener {
         Box floor = new Box(v, 100, 0, 100);
         Geometry floorMesh = new Geometry("Floor", floor);
         Material floorMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        floorMaterial.setColor("Color", ColorRGBA.LightGray);
+        floorMaterial.setColor("Color", ColorRGBA.Black);
         floorMesh.setMaterial(floorMaterial);
         floorMesh.setName("floor");
         return floorMesh;
@@ -126,10 +130,26 @@ public class Main extends SimpleApplication implements AnalogListener {
         playerMesh.setMaterial(playerMaterial);
         playerMesh.setName("player");
         return playerMesh;
+        
+//        futuristicPlane = assetManager.loadModel("Models/Futuristic plane/Futuristic plane.j3o");
+//        futuristicPlane.scale(0.1f, 0.1f, 0.1f);    
+//        futuristicPlane.rotate(0.0f, (float)Math.PI, 0.0f);
+//        futuristicPlane.setLocalTranslation(0, 0, 0);
+//        futuristicPlane.setName("plane");
+//        futuristicPlane.setBoundRefresh();
+//          
+//        return futuristicPlane;
+          
+    }
+    
+    public void createSun() {
+        DirectionalLight sun = new DirectionalLight();
+        sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f).normalizeLocal());
+        rootNode.addLight(sun);
     }
     
     public Node createPlayerAndFloor() {
-        Geometry player = createPlayer();
+        Spatial player = createPlayer();
         Geometry floor = createFloor();
         Node node = new Node();
         node.attachChild(player);
@@ -162,6 +182,7 @@ public class Main extends SimpleApplication implements AnalogListener {
         Geometry cubeMesh = new Geometry("Cube", b);
         Material cubeMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         cubeMaterial.setColor("Color", ColorRGBA.Red);
+        cubeMaterial.getAdditionalRenderState().setWireframe(true);
         cubeMesh.setMaterial(cubeMaterial);
         cubeMesh.setName("cube");
         return cubeMesh;
@@ -174,7 +195,7 @@ public class Main extends SimpleApplication implements AnalogListener {
         
         float x = FastMath.nextRandomInt(playerX - 40, playerX + 40);
         float z = playerZ + 50;
-        Vector3f v = new Vector3f(x, 0.5f, z);
+        Vector3f v = new Vector3f(x, 1f, z);
         Geometry cube = createCube(v);
         rootNode.attachChild(cube);
         cubeField.add(cube);
@@ -230,7 +251,7 @@ public class Main extends SimpleApplication implements AnalogListener {
         }
         
         for (int i = 0; i < cubeField.size(); i++) {
-            Geometry playerModel = (Geometry) playerAndFloor.getChild(0);
+            Spatial playerModel = playerAndFloor.getChild(0);
             BoundingVolume playerVolume = playerModel.getWorldBound();
             BoundingVolume cubeVolume = cubeField.get(i).getWorldBound();
 
