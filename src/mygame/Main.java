@@ -53,6 +53,13 @@ public class Main extends SimpleApplication implements AnalogListener {
     private AudioNode music;
     private AudioNode collisionSound;
     private double spawnInterval;
+    private Spatial player;
+    private Geometry floor;
+    
+    private double currentRollAngle;
+    private double previousRollAngle;
+    private double changeInRollAngle;
+            
     
     public static void main(String[] args) {
         Main app = new Main();
@@ -77,17 +84,22 @@ public class Main extends SimpleApplication implements AnalogListener {
         Keys();
         setDisplayStatView(false); 
         setDisplayFps(false);
-        playerAndFloor = createPlayerAndFloor();
-        rootNode.attachChild(playerAndFloor);
+        //playerAndFloor = createPlayerAndFloor();
+        player = createFuturisticPlane();
+        floor = createFloor();
+        rootNode.attachChild(player);
+        rootNode.attachChild(floor);
+        //rootNode.attachChild(playerAndFloor);
         cubeColor = ColorRGBA.Red;
         createStartText();
         createScoreText();
         createSun();
+        previousRollAngle = 0;
         
         renderer.setBackgroundColor(ColorRGBA.Black);
         createSounds();
-        cam.setLocation(playerAndFloor.getLocalTranslation().add(0, 2, -8));
-        cam.lookAt(playerAndFloor.getLocalTranslation(), Vector3f.UNIT_Z);
+        cam.setLocation(player.getLocalTranslation().add(0, 2, -8));
+        cam.lookAt(player.getLocalTranslation(), Vector3f.UNIT_Z);
                
         RUNNING = false;
         
@@ -113,7 +125,7 @@ public class Main extends SimpleApplication implements AnalogListener {
     }
     
     public Geometry createFloor() {
-        Vector3f v = new Vector3f(0.0f, 0.0f, 50.0f);
+        Vector3f v = new Vector3f(0.0f, -2.0f, 50.0f);
         Box floor = new Box(v, 100, 0, 100);
         Geometry floorMesh = new Geometry("Floor", floor);
         Material floorMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -183,8 +195,8 @@ public class Main extends SimpleApplication implements AnalogListener {
     
     public void addRandomCube() {
         
-        int playerX = (int) playerAndFloor.getLocalTranslation().getX();
-        int playerZ = (int) playerAndFloor.getLocalTranslation().getZ();
+        int playerX = (int) player.getLocalTranslation().getX();
+        int playerZ = (int) player.getLocalTranslation().getZ();
         
         float x = FastMath.nextRandomInt(playerX - 40, playerX + 40);
         float z = playerZ + 50;
@@ -214,11 +226,13 @@ public class Main extends SimpleApplication implements AnalogListener {
     public void gameReset() {
         score = 0;
         secondsElapsed = 0;
+        previousRollAngle = 0.0;
         for (Geometry cube : cubeField) {
             cube.removeFromParent();
         }
         cubeField.clear();
-        playerAndFloor.setLocalTranslation(0, 0, 0);
+        player.setLocalTranslation(0, 0, 0);
+        floor.setLocalTranslation(0, 0, 0);
     }
     
     //gameLost() stops game and animates a collision with sound effects.
@@ -230,26 +244,34 @@ public class Main extends SimpleApplication implements AnalogListener {
     }
     
     public void camBehind() {
-        cam.setLocation(playerAndFloor.getLocalTranslation().add(0, 1, -3));
-        Vector3f viewTarget = playerAndFloor.getLocalTranslation().add(0, 0, 5);
+        cam.setLocation(player.getLocalTranslation().add(0, 1, -3));
+        Vector3f viewTarget = player.getLocalTranslation().add(0, 0, 5);
         cam.lookAt(viewTarget, Vector3f.UNIT_Z);
         
     }
     
     public void gameLogic(float tpf) {
         Vector3f v = new Vector3f(0.0f, 0.0f, 0.5f);
-        playerAndFloor.move(v);
+        player.move(v);
+        floor.move(v);
         score += 1;
-        
-        rollAngle = LeapMotionListener.getRoll();
+        previousRollAngle = currentRollAngle;
+        currentRollAngle = LeapMotionListener.getRoll();
+        System.out.println("previousRollAngle: " + previousRollAngle);
+        System.out.println("currentRollAngle: " + currentRollAngle);
+        //Quaternion quat = new Quaternion(0f, (float)Math.PI, (float) (rollAngle * -1.0 * Math.PI / 180.0), 1);
         //System.out.println("rollAngle: " + rollAngle + " degrees");
+        changeInRollAngle = currentRollAngle - previousRollAngle;
         
-        
-        turnSpeed = .50f * (float)rollAngle / 90.0f;
-        if (rollAngle > 0.0 && rollAngle < 179.0) {
-            playerAndFloor.move(turnSpeed, 0, 0);
-        } else if (rollAngle < 0.0) {
-            playerAndFloor.move(turnSpeed, 0, 0);
+        turnSpeed = .50f * (float)currentRollAngle / 90.0f;
+        if (currentRollAngle > 0.0 && currentRollAngle < 179.0) {
+            player.move(turnSpeed, 0, 0);
+            floor.move(turnSpeed, 0, 0);
+            player.rotate(0f, 0f, (float)(changeInRollAngle / 180.0 * 3.0));
+        } else if (currentRollAngle < 0.0) {
+            player.move(turnSpeed, 0, 0);
+            floor.move(turnSpeed, 0, 0);
+            player.rotate(0f, 0f, (float)(changeInRollAngle / 180.0 * 3.0));
         } 
         secondsElapsed += tpf;
         spawnInterval = -1.312 * Math.pow(10, -7) * Math.pow(secondsElapsed, 3) + 
@@ -263,12 +285,11 @@ public class Main extends SimpleApplication implements AnalogListener {
         
         for (int i = 0; i < cubeField.size(); i++) {
             //Geometry playerModel = (Geometry) playerAndFloor.getChild(0);
-            Spatial playerModel = playerAndFloor.getChild(0);
-            BoundingVolume playerVolume = playerModel.getWorldBound();
+            BoundingVolume playerVolume = player.getWorldBound();
             BoundingVolume cubeVolume = cubeField.get(i).getWorldBound();
 
             float cubeZ = cubeField.get(i).getLocalTranslation().getZ();
-            float playerZ = playerAndFloor.getLocalTranslation().getZ();
+            float playerZ = player.getLocalTranslation().getZ();
 
             if (playerVolume.intersects(cubeVolume)) {
                 gameLost();
@@ -296,16 +317,14 @@ public class Main extends SimpleApplication implements AnalogListener {
             gameReset();
             System.out.println("START");
         }else if (RUNNING == true && binding.equals("Left")){
-            playerAndFloor.move(.2f, 0, 0);
+            player.move(.2f, 0, 0);
+            floor.move(.2f, 0, 0);
             //camAngle -= value*tpf;
         }else if (RUNNING == true && binding.equals("Right")){
-            playerAndFloor.move(-.2f, 0, 0);
+            player.move(-.2f, 0, 0);
+            floor.move(-.2f, 0, 0);
             //camAngle += value*tpf;
         }
-    }
-    
-    public void setRollAngle(double angle) {
-        rollAngle = angle;
     }
     
 }
