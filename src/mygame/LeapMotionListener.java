@@ -13,6 +13,7 @@ import com.leapmotion.leap.Gesture.State;
 public class LeapMotionListener extends Listener {
     
     private static double rollAngle;
+    private Hand hand;
    
     public LeapMotionListener() {
 
@@ -37,9 +38,9 @@ public class LeapMotionListener extends Listener {
     @Override
     public void onFrame(Controller controller) {
         // Get the most recent frame and report some basic information
-        Hand rightHand = controller.frame().hands().rightmost();
-        Vector normal = rightHand.palmNormal();
-        Vector direction = rightHand.direction();
+        hand = controller.frame().hands().rightmost();
+        Vector normal = hand.palmNormal();
+        Vector direction = hand.direction();
 
         rollAngle = Math.toDegrees(normal.roll());
 
@@ -47,6 +48,10 @@ public class LeapMotionListener extends Listener {
     
     public static double getRoll() {
         return rollAngle;
+    }
+    
+    public boolean handAbove() {
+        return hand.isValid();
     }
 }
 

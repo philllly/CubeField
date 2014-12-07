@@ -48,6 +48,7 @@ public class Main extends SimpleApplication implements AnalogListener {
     private Controller controller;
     private float turnSpeed;
     private AudioNode music;
+    private AudioNode collisionSound;
     private double spawnInterval;
     
     public static void main(String[] args) {
@@ -80,11 +81,7 @@ public class Main extends SimpleApplication implements AnalogListener {
         createScoreText();
         
         renderer.setBackgroundColor(ColorRGBA.Black);
-        
-        music = new AudioNode(assetManager, "Sounds/Tron Legacy.wav", true);
-        music.setPositional(false);
-        music.play();
-        rootNode.attachChild(music);
+        createSounds();
         cam.setLocation(playerAndFloor.getLocalTranslation().add(0, 2, -8));
         cam.lookAt(playerAndFloor.getLocalTranslation(), Vector3f.UNIT_Z);
                
@@ -104,7 +101,7 @@ public class Main extends SimpleApplication implements AnalogListener {
 
     @Override
     public void simpleUpdate(float tpf) {
-        if (RUNNING) {
+        if (listener.handAbove() && RUNNING) {
             gameLogic(tpf);
         }
         camBehind();
@@ -148,8 +145,6 @@ public class Main extends SimpleApplication implements AnalogListener {
         startText.setColor(ColorRGBA.Blue);
         startText.setLocalTranslation(100, startText.getLineHeight(), 0f);
         guiNode.attachChild(startText);
-        
-        
     }
     
     public void createScoreText() {
@@ -184,11 +179,22 @@ public class Main extends SimpleApplication implements AnalogListener {
         Geometry cube = createCube(v);
         rootNode.attachChild(cube);
         cubeField.add(cube);
-        
     }
 
+    public void createSounds() {
+        music = new AudioNode(assetManager, "Sounds/Tron Legacy.wav", false);
+        music.setPositional(false);
+        music.setLooping(true);
+        rootNode.attachChild(music);
+        music.playInstance();
+        collisionSound = new AudioNode(assetManager, "Sounds/Smashing Sound.wav", false);
+        collisionSound.setPositional(false);
+        rootNode.attachChild(collisionSound);
+    }
+    
     public void gameReset() {
         score = 0;
+        secondsElapsed = 0;
         for (Geometry cube : cubeField) {
             cube.removeFromParent();
         }
@@ -196,7 +202,9 @@ public class Main extends SimpleApplication implements AnalogListener {
         playerAndFloor.setLocalTranslation(0, 0, 0);
     }
     
+    //gameLost() stops game and animates a collision with sound effects.
     public void gameLost() {
+        collisionSound.play();
         RUNNING = false;
         createStartText();
         
