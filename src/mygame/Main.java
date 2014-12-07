@@ -24,7 +24,10 @@ import com.jme3.input.KeyInput;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.font.BitmapText;
+import com.jme3.light.DirectionalLight;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Rectangle;
+import com.jme3.scene.Spatial;
 import com.leapmotion.leap.*;
 import com.leapmotion.leap.Gesture.State;
 
@@ -79,6 +82,7 @@ public class Main extends SimpleApplication implements AnalogListener {
         cubeColor = ColorRGBA.Red;
         createStartText();
         createScoreText();
+        createSun();
         
         renderer.setBackgroundColor(ColorRGBA.Black);
         createSounds();
@@ -129,8 +133,17 @@ public class Main extends SimpleApplication implements AnalogListener {
         return playerMesh;
     }
     
+    public Spatial createFuturisticPlane() {
+        Spatial futuristicPlane = assetManager.loadModel("Models/Futuristic plane.j3o");
+        futuristicPlane.rotate(0.0f, (float)Math.PI, 0.0f);
+        futuristicPlane.setLocalTranslation(0, 0, 0);
+        futuristicPlane.scale(0.1f, 0.1f, 0.1f);
+        return futuristicPlane;
+    }
+    
     public Node createPlayerAndFloor() {
-        Geometry player = createPlayer();
+        //Geometry player = createPlayer();
+        Spatial player = createFuturisticPlane();
         Geometry floor = createFloor();
         Node node = new Node();
         node.attachChild(player);
@@ -192,6 +205,12 @@ public class Main extends SimpleApplication implements AnalogListener {
         rootNode.attachChild(collisionSound);
     }
     
+    public void createSun() {
+        DirectionalLight sun = new DirectionalLight();
+        sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f).normalizeLocal());
+        rootNode.addLight(sun);
+    }
+    
     public void gameReset() {
         score = 0;
         secondsElapsed = 0;
@@ -243,7 +262,8 @@ public class Main extends SimpleApplication implements AnalogListener {
         }
         
         for (int i = 0; i < cubeField.size(); i++) {
-            Geometry playerModel = (Geometry) playerAndFloor.getChild(0);
+            //Geometry playerModel = (Geometry) playerAndFloor.getChild(0);
+            Spatial playerModel = playerAndFloor.getChild(0);
             BoundingVolume playerVolume = playerModel.getWorldBound();
             BoundingVolume cubeVolume = cubeField.get(i).getWorldBound();
 
