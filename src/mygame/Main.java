@@ -164,20 +164,22 @@ public class Main extends SimpleApplication implements AnalogListener {
     }
     
     public void createStartText() {
-        startText = new BitmapText(guiFont, false);
+        BitmapFont myFont = assetManager.loadFont("Interface/Fonts/RBNo2LightAlternative.fnt");
+        startText = new BitmapText(myFont, false);
         startText.setText("Press Enter to Start");
-        startText.setSize(50);
-        startText.setColor(ColorRGBA.Blue);
-        startText.setLocalTranslation(100, startText.getLineHeight(), 0f);
+        startText.setSize(150);
+        startText.setColor(ColorRGBA.White);
+        startText.setLocalTranslation(settings.getWidth() / 2, settings.getHeight() / 2, 0f);
         guiNode.attachChild(startText);
     }
     
     public void createScoreText() {
-        scoreText = new BitmapText(guiFont, false);
+        BitmapFont myFont = assetManager.loadFont("Interface/Fonts/RBNo2LightAlternative.fnt");
+        scoreText = new BitmapText(myFont, false);
         scoreText.setText("Score: ");
-        scoreText.setSize(50);
-        scoreText.setColor(ColorRGBA.Orange);
-        scoreText.setLocalTranslation(300, scoreText.getLineHeight(), 0f);
+        scoreText.setSize(150);
+        scoreText.setColor(ColorRGBA.White);
+        scoreText.setLocalTranslation(settings.getWidth() / 9, settings.getHeight() * 5 / 7, 0f);
         guiNode.attachChild(scoreText);
     }
     
@@ -260,8 +262,6 @@ public class Main extends SimpleApplication implements AnalogListener {
         score += 1;
         previousRollAngle = currentRollAngle;
         currentRollAngle = LeapMotionListener.getRoll();
-        System.out.println("previousRollAngle: " + previousRollAngle);
-        System.out.println("currentRollAngle: " + currentRollAngle);
         //Quaternion quat = new Quaternion(0f, (float)Math.PI, (float) (rollAngle * -1.0 * Math.PI / 180.0), 1);
         //System.out.println("rollAngle: " + rollAngle + " degrees");
         changeInRollAngle = currentRollAngle - previousRollAngle;
