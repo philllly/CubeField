@@ -185,7 +185,8 @@ public class Main extends SimpleApplication implements AnalogListener {
         Box b = new Box(loc, 1, 1, 1);
         Geometry cubeMesh = new Geometry("Cube", b);
         Material cubeMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        cubeMaterial.setColor("Color", ColorRGBA.Red);
+        ColorRGBA col = new ColorRGBA(0.0f, 240.0f, 0.0f, 1.0f);
+        cubeMaterial.setColor("Color", col);
         cubeMaterial.getAdditionalRenderState().setWireframe(true);
         cubeMesh.setMaterial(cubeMaterial);
         cubeMesh.setName("cube");
@@ -219,7 +220,9 @@ public class Main extends SimpleApplication implements AnalogListener {
     
     public void createSun() {
         DirectionalLight sun = new DirectionalLight();
-        sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f).normalizeLocal());
+        sun.setDirection(new Vector3f(-1.0f, -7.0f, -10.0f).normalizeLocal());
+        ColorRGBA col = new ColorRGBA(1.0f, 1.0f, 1.0f, 0.01f);
+        sun.setColor(col);
         rootNode.addLight(sun);
     }
     
