@@ -300,23 +300,17 @@ public class Main extends SimpleApplication implements AnalogListener {
             cubeColor = new ColorRGBA(24f/255f, 202f/255f, 230f/255f, 1.0f);
         }
         if (secondsElapsed > 20.0 && secondsElapsed < 30.0) {
-            cubeColor = new ColorRGBA(220f/255f, 33f/255f, 33f/255f, 1.0f);
+            cubeColor = getRandomColor();
             //cubeColor.set(ColorRGBA.Red);
         }
         if (secondsElapsed > 30.0 && secondsElapsed < 40.0) {
-            float randR = (float) (Math.random() * 255);
-            float randG = (float) (Math.random() * 255);
-            float randB = (float) (Math.random() * 255);
-            cubeColor.set(randR/255f, randG/255f, randB/255f, 1.0f);
+            setFlashingRandomColors();
         }
         if (secondsElapsed > 40.0 && secondsElapsed < 50.0) {
-            float randR = (float) (Math.random() * 255);
-            float randG = (float) (Math.random() * 255);
-            float randB = (float) (Math.random() * 255);
-            cubeColor = new ColorRGBA(randR/255f, randG/255f, randB/255f, 1.0f);
+            cubeColor = getRandomColor();
         }
         if (secondsElapsed > 50.0 && secondsElapsed < 60.0) {
-            
+            setFlashingRandomColors();
         }
         if (secondsElapsed > 60.0 && secondsElapsed < 70.0) {
             
@@ -327,6 +321,21 @@ public class Main extends SimpleApplication implements AnalogListener {
         if (secondsElapsed > 80.0 && secondsElapsed < 90.0) {
 
         }
+    }
+    
+    public ColorRGBA getRandomColor() {
+        float randR = (float) (Math.random() * 255);
+        float randG = (float) (Math.random() * 255);
+        float randB = (float) (Math.random() * 255);
+        cubeColor = new ColorRGBA(randR/255f, randG/255f, randB/255f, 1.0f);
+        return cubeColor;
+    }
+    
+    public void setFlashingRandomColors() {
+        float randR = (float) (Math.random() * 255);
+        float randG = (float) (Math.random() * 255);
+        float randB = (float) (Math.random() * 255);        
+        cubeColor.set(randR/255f, randG/255f, randB/255f, 1.0f);       
     }
     
     public void Keys() {
