@@ -89,8 +89,8 @@ public class Main extends SimpleApplication implements AnalogListener {
         floor = createFloor();
         rootNode.attachChild(player);
         rootNode.attachChild(floor);
-        //rootNode.attachChild(playerAndFloor);
-        cubeColor = ColorRGBA.Red;
+        //rootNode.attachChild(playerAndFloor);1
+        cubeColor = new ColorRGBA(0, 240/255, 0, 1.0f);
         createStartText();
         createScoreText();
         createSun();
@@ -105,8 +105,6 @@ public class Main extends SimpleApplication implements AnalogListener {
         
         cubeField = new ArrayList<Geometry>();
         gameReset();
-
-
     }
     
     public void setupLeapMotion() {
@@ -119,6 +117,7 @@ public class Main extends SimpleApplication implements AnalogListener {
     public void simpleUpdate(float tpf) {
         if (listener.handAbove() && RUNNING) {
             gameLogic(tpf);
+            colorLogic();
         }
         camBehind();
      
@@ -133,16 +132,6 @@ public class Main extends SimpleApplication implements AnalogListener {
         floorMesh.setMaterial(floorMaterial);
         floorMesh.setName("floor");
         return floorMesh;
-    }
-    
-    public Geometry createPlayer() {
-        Dome b = new Dome(Vector3f.ZERO, 10, 100, 0.5f);
-        Geometry playerMesh = new Geometry("Player", b);
-        Material playerMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        playerMaterial.setColor("Color", ColorRGBA.Red);
-        playerMesh.setMaterial(playerMaterial);
-        playerMesh.setName("player");
-        return playerMesh;
     }
     
     public Spatial createFuturisticPlane() {
@@ -187,8 +176,7 @@ public class Main extends SimpleApplication implements AnalogListener {
         Box b = new Box(loc, 1, 1, 1);
         Geometry cubeMesh = new Geometry("Cube", b);
         Material cubeMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        ColorRGBA col = new ColorRGBA(0.0f, 240.0f, 0.0f, 1.0f);
-        cubeMaterial.setColor("Color", col);
+        cubeMaterial.setColor("Color", cubeColor);
         cubeMaterial.getAdditionalRenderState().setWireframe(true);
         cubeMesh.setMaterial(cubeMaterial);
         cubeMesh.setName("cube");
@@ -232,6 +220,7 @@ public class Main extends SimpleApplication implements AnalogListener {
         score = 0;
         secondsElapsed = 0;
         previousRollAngle = 0.0;
+        cubeColor = new ColorRGBA(0.0f, 240.0f, 0.0f, 1.0f);
         for (Geometry cube : cubeField) {
             cube.removeFromParent();
         }
@@ -304,6 +293,40 @@ public class Main extends SimpleApplication implements AnalogListener {
             }
         }
         scoreText.setText("Score: " + score);
+    }
+    
+    public void colorLogic() {
+        if (secondsElapsed > 10.0 && secondsElapsed < 20.0) {
+            cubeColor = new ColorRGBA(24f/255f, 202f/255f, 230f/255f, 1.0f);
+        }
+        if (secondsElapsed > 20.0 && secondsElapsed < 30.0) {
+            cubeColor = new ColorRGBA(220f/255f, 33f/255f, 33f/255f, 1.0f);
+            //cubeColor.set(ColorRGBA.Red);
+        }
+        if (secondsElapsed > 30.0 && secondsElapsed < 40.0) {
+            float randR = (float) (Math.random() * 255);
+            float randG = (float) (Math.random() * 255);
+            float randB = (float) (Math.random() * 255);
+            cubeColor.set(randR/255f, randG/255f, randB/255f, 1.0f);
+        }
+        if (secondsElapsed > 40.0 && secondsElapsed < 50.0) {
+            float randR = (float) (Math.random() * 255);
+            float randG = (float) (Math.random() * 255);
+            float randB = (float) (Math.random() * 255);
+            cubeColor = new ColorRGBA(randR/255f, randG/255f, randB/255f, 1.0f);
+        }
+        if (secondsElapsed > 50.0 && secondsElapsed < 60.0) {
+            
+        }
+        if (secondsElapsed > 60.0 && secondsElapsed < 70.0) {
+            
+        }
+        if (secondsElapsed > 70.0 && secondsElapsed < 80.0) {
+            
+        }
+        if (secondsElapsed > 80.0 && secondsElapsed < 90.0) {
+
+        }
     }
     
     public void Keys() {
