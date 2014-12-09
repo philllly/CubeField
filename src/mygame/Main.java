@@ -168,7 +168,8 @@ public class Main extends SimpleApplication implements AnalogListener {
         scoreText.setText("Score: ");
         scoreText.setSize(150);
         scoreText.setColor(ColorRGBA.White);
-        scoreText.setLocalTranslation(settings.getWidth() / 9, settings.getHeight() * 5 / 7, 0f);
+        scoreText.setLocalTranslation((settings.getWidth() / 2) - (scoreText.getLineWidth() * 3 / 4), 
+                settings.getHeight() * 8 / 9, 0f);
         guiNode.attachChild(scoreText);
     }
     
@@ -337,6 +338,7 @@ public class Main extends SimpleApplication implements AnalogListener {
         float randB = (float) (Math.random() * 255);        
         cubeColor.set(randR/255f, randG/255f, randB/255f, 1.0f);       
     }
+
     
     public void Keys() {
         inputManager.addMapping("START", new KeyTrigger(KeyInput.KEY_RETURN));
