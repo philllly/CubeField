@@ -84,12 +84,10 @@ public class Main extends SimpleApplication implements AnalogListener {
         Keys();
         setDisplayStatView(false); 
         setDisplayFps(false);
-        //playerAndFloor = createPlayerAndFloor();
         player = createFuturisticPlane();
         floor = createFloor();
         rootNode.attachChild(player);
         rootNode.attachChild(floor);
-        //rootNode.attachChild(playerAndFloor);1
         cubeColor = new ColorRGBA(0, 240/255, 0, 1.0f);
         createStartText();
         createScoreText();
@@ -142,23 +140,14 @@ public class Main extends SimpleApplication implements AnalogListener {
         return futuristicPlane;
     }
     
-    public Node createPlayerAndFloor() {
-        //Geometry player = createPlayer();
-        Spatial player = createFuturisticPlane();
-        Geometry floor = createFloor();
-        Node node = new Node();
-        node.attachChild(player);
-        node.attachChild(floor);
-        return node;
-    }
-    
     public void createStartText() {
         BitmapFont myFont = assetManager.loadFont("Interface/Fonts/RBNo2LightAlternative.fnt");
         startText = new BitmapText(myFont, false);
         startText.setText("Press Enter to Start");
         startText.setSize(150);
         startText.setColor(ColorRGBA.White);
-        startText.setLocalTranslation(settings.getWidth() / 2, settings.getHeight() / 2, 0f);
+        startText.setLocalTranslation((settings.getWidth() / 2) - (startText.getLineWidth() / 2),
+                settings.getHeight() / 2, 0f);
         guiNode.attachChild(startText);
     }
     
@@ -252,8 +241,6 @@ public class Main extends SimpleApplication implements AnalogListener {
         score += 1;
         previousRollAngle = currentRollAngle;
         currentRollAngle = LeapMotionListener.getRoll();
-        //Quaternion quat = new Quaternion(0f, (float)Math.PI, (float) (rollAngle * -1.0 * Math.PI / 180.0), 1);
-        //System.out.println("rollAngle: " + rollAngle + " degrees");
         changeInRollAngle = currentRollAngle - previousRollAngle;
         
         turnSpeed = .50f * (float)currentRollAngle / 90.0f;
@@ -277,7 +264,6 @@ public class Main extends SimpleApplication implements AnalogListener {
         }
         
         for (int i = 0; i < cubeField.size(); i++) {
-            //Geometry playerModel = (Geometry) playerAndFloor.getChild(0);
             BoundingVolume playerVolume = player.getWorldBound();
             BoundingVolume cubeVolume = cubeField.get(i).getWorldBound();
 
@@ -314,13 +300,16 @@ public class Main extends SimpleApplication implements AnalogListener {
             setFlashingRandomColors();
         }
         if (secondsElapsed > 60.0 && secondsElapsed < 70.0) {
-            
+            cubeColor = new ColorRGBA(255f/255f, 0, 255f/255f, 1.0f);
         }
         if (secondsElapsed > 70.0 && secondsElapsed < 80.0) {
-            
+            setFlashingRandomColors();
         }
         if (secondsElapsed > 80.0 && secondsElapsed < 90.0) {
-
+            cubeColor = getRandomColor();
+        }
+        if (secondsElapsed > 90.0) {
+            setFlashingRandomColors();
         }
     }
     
