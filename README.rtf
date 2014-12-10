@@ -4,20 +4,43 @@
 \margl1440\margr1440\vieww10800\viewh8400\viewkind0
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
 
-\f0\fs24 \cf0 CubeField Game\
+\f0\fs24 \cf0 CUBEFIELD GAME\
 \
-Instructions:\
+
+\b Instructions
+\b0 \
 1. Plug in the Leap Motion Controller into your computer\'92s USB port.\
-2. \
+2. Select the resolution that you would like to run the game at. The refresh rate does not need to be adjusted; it has already been capped at 60 fps (frames per second).\
 \
-Classes:\
-Main.java - initializes the objects, handles the game logic, \
-LeapMotionListener.java - reads in data from \
+
+\b Classes
+\b0 \
+Main.java\
+	initializes the objects\
+	handles the game logic\
+	creates cubes using the Geometry class from jMonkey Engine\
+LeapMotionListener.java \
+	reads in data from the Leap Motion controller\
+	continuously updates to retrieve the most current information about the user\'92s hands:\
+		- right or left hand\
+		- normal vector from player\'92s palm\
+		- change in roll angle of the player\'92s palm\
 \
-Libraries:\
+*Originally created Cube and Player class, but decided it was easier to add createPlayer() and createCube() methods to Main.java because jMonkeyEngine already has a Geometry class. My original Cube and Player classes were acting just like these methods, so it didn\'92t make sense to create new classes. \
+\
+
+\b Libraries
+\b0 \
 jMonkey Engine 3\
 Leap Motion\
 \
-Base Level 2\
-Leap Motion\
-Animation - changing colors as levels increase, plane changes rotation}
+
+\b Game Difficulty
+\b0 \
+Base Game: 2\
+Leap Motion: 1\
+Animation: 1\
+	changing colors as difficulty increases with new levels\
+	futuristic plane changes rotation\
+	game music\
+	sound effect upon collision}

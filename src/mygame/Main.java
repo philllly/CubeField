@@ -73,7 +73,7 @@ public class Main extends SimpleApplication implements AnalogListener {
         settings.setFullscreen(true);
         app.setSettings(settings);
         app.start();
-        System.setProperty("java.library.path", "/Users/crisscrosskao/Documents/GitHub/CubeField/leapLib");
+        System.setProperty("java.library.path", "./leapLib");
         
     }
 
