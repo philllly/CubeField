@@ -42,7 +42,7 @@ public class Main extends SimpleApplication implements AnalogListener {
     private boolean RUNNING;
     private ColorRGBA cubeColor;
     private float timeInterval = 0;
-    private float secondsElapsed = 0;
+    private float secondsElapsed = 60;
     private BitmapText startText;
     private BitmapText scoreText;
     private int score = 0;
@@ -71,20 +71,26 @@ public class Main extends SimpleApplication implements AnalogListener {
         settings.setTitle("CubeField");
         settings.setResolution(modes[0].getWidth(),modes[0].getHeight());
         settings.setFullscreen(true);
+        settings.setSettingsDialogImage("Interface/CubeField Instructions.png");
         app.setSettings(settings);
         app.start();
-        System.setProperty("java.library.path", "./leapLib");
+        //System.out.println("user.home = " + System.getProperty("user.home"));
+        String directory = "/Applications/MyGame.app/Contents/Java/leapLib";
+        //System.out.println(directory);
+        System.setProperty("java.library.path", directory);
         
     }
 
     @Override
     public void simpleInitApp() {
+        //
         flyCam.setEnabled(false);
         setupLeapMotion();
         Keys();
         setDisplayStatView(false); 
         setDisplayFps(false);
         player = createFuturisticPlane();
+        inputManager.setCursorVisible(false);
         floor = createFloor();
         rootNode.attachChild(player);
         rootNode.attachChild(floor);
@@ -208,7 +214,7 @@ public class Main extends SimpleApplication implements AnalogListener {
     
     public void gameReset() {
         score = 0;
-        secondsElapsed = 0;
+        secondsElapsed = 60;
         previousRollAngle = 0.0;
         cubeColor = new ColorRGBA(0.0f, 240.0f, 0.0f, 1.0f);
         for (Geometry cube : cubeField) {
