@@ -42,7 +42,7 @@ public class Main extends SimpleApplication implements AnalogListener {
     private boolean RUNNING;
     private ColorRGBA cubeColor;
     private float timeInterval = 0;
-    private float secondsElapsed = 60;
+    private float secondsElapsed = 0;
     private BitmapText startText;
     private BitmapText scoreText;
     private int score = 0;
@@ -214,7 +214,7 @@ public class Main extends SimpleApplication implements AnalogListener {
     
     public void gameReset() {
         score = 0;
-        secondsElapsed = 60;
+        secondsElapsed = 0;
         previousRollAngle = 0.0;
         cubeColor = new ColorRGBA(0.0f, 240.0f, 0.0f, 1.0f);
         for (Geometry cube : cubeField) {
