@@ -61,7 +61,8 @@ public class Main extends SimpleApplication implements AnalogListener {
     private double changeInRollAngle;
             
     
-    public static void main(String[] args) {
+    //public static void main(String[] args) {
+    public static void run() {
         Main app = new Main();
         GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().
                 getDefaultScreenDevice();
@@ -74,10 +75,6 @@ public class Main extends SimpleApplication implements AnalogListener {
         settings.setSettingsDialogImage("Interface/CubeField Instructions.png");
         app.setSettings(settings);
         app.start();
-        //System.out.println("user.home = " + System.getProperty("user.home"));
-        String directory = "/Applications/MyGame.app/Contents/Java/leapLib";
-        //System.out.println(directory);
-        System.setProperty("java.library.path", directory);
         
     }
 
@@ -293,8 +290,8 @@ public class Main extends SimpleApplication implements AnalogListener {
             cubeColor = new ColorRGBA(24f/255f, 202f/255f, 230f/255f, 1.0f);
         }
         if (secondsElapsed > 20.0 && secondsElapsed < 30.0) {
-            cubeColor = getRandomColor();
-            //cubeColor.set(ColorRGBA.Red);
+            //cubeColor = getRandomColor();
+            cubeColor.set(ColorRGBA.Pink);
         }
         if (secondsElapsed > 30.0 && secondsElapsed < 40.0) {
             setFlashingRandomColors();
